@@ -1,0 +1,363 @@
+/* ======== Game HUD ======== */
+.game-hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background: rgba(10, 22, 40, 0.9);
+  border-bottom: 1px solid var(--color-border);
+  z-index: 100;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.hud-timer {
+  font-size: 1.5rem;
+  color: var(--color-warning);
+  font-weight: 800;
+}
+
+.hud-timer.danger {
+  color: var(--color-danger);
+  animation: shake 0.3s ease infinite;
+}
+
+/* ======== Game Canvas ======== */
+.game-canvas {
+  position: fixed;
+  top: 48px;
+  left: 0;
+  right: 0;
+  bottom: 100px;
+  background: linear-gradient(180deg, #b8e9f5 0%, #b8e9f5 30%, #4e9ddf 30%, #4e9ddf 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ======== Rod Animation ======== */
+.rod-anim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  z-index: 1;
+}
+
+/* ======== Bobber Sprite ======== */
+.bobber-sprite {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+  transition: top 0.4s ease, left 0.5s ease;
+}
+
+.bobber-sprite.bite {
+  animation: bobberBiteSprite 0.12s ease infinite alternate;
+}
+
+@keyframes bobberBiteSprite {
+  from { margin-top: 0; }
+  to   { margin-top: 8px; }
+}
+
+/* ======== Exclamation Sprite ======== */
+.exclamation-sprite {
+  position: absolute;
+  width: 16px;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  top: 45%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6));
+}
+
+.exclamation-sprite.show {
+  animation: exclamPop 0.25s ease forwards;
+}
+
+@keyframes exclamPop {
+  0%   { transform: translateX(-50%) scale(0); }
+  60%  { transform: translateX(-50%) scale(1.4); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+/* ======== Meme Overlay ======== */
+.meme-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  max-width: 180px;
+  max-height: 180px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 3px solid white;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  z-index: 55;
+}
+
+.meme-overlay.show {
+  animation: memePop 0.4s ease forwards;
+}
+
+@keyframes memePop {
+  0%   { transform: translate(-50%, -50%) scale(0) rotate(-10deg); }
+  60%  { transform: translate(-50%, -50%) scale(1.1) rotate(3deg); }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+}
+
+/* ======== Catch Display ======== */
+.catch-display {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  animation: pop 0.4s ease forwards;
+  z-index: 10;
+  background: rgba(10, 22, 40, 0.78);
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  min-width: 140px;
+}
+
+.catch-fish-img {
+  width: 80px;
+  height: 64px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  display: block;
+  margin: 0 auto 0.25rem;
+}
+
+.catch-emoji {
+  font-size: 4rem;
+}
+
+.catch-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
+.catch-points {
+  font-size: 1rem;
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.catch-points.negative {
+  color: var(--color-danger);
+}
+
+/* ======== Game Message ======== */
+.game-message {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--color-text);
+  opacity: 0;
+  transition: opacity 0.3s;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+  z-index: 8;
+  background: rgba(10, 22, 40, 0.6);
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+}
+
+.game-message.visible {
+  opacity: 1;
+}
+
+/* ======== Castastrophe Banner ======== */
+.castastrophe-banner {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  background: var(--color-danger);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+  z-index: 50;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);
+}
+
+.castastrophe-banner.show {
+  display: block;
+  animation: bannerPop 0.4s ease forwards;
+}
+
+@keyframes bannerPop {
+  0% { transform: translateX(-50%) scale(0) rotate(-5deg); }
+  60% { transform: translateX(-50%) scale(1.1) rotate(2deg); }
+  100% { transform: translateX(-50%) scale(1) rotate(0deg); }
+}
+
+/* ======== Game Controls ======== */
+.game-controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0 1rem;
+  background: rgba(10, 22, 40, 0.95);
+  border-top: 1px solid var(--color-border);
+}
+
+.btn-cast, .btn-reel {
+  width: 100%;
+  max-width: 300px;
+  padding: 1.25rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+  border-radius: var(--radius);
+}
+
+.btn-cast {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-reel {
+  background: var(--color-success);
+  color: white;
+}
+
+.btn-reel.active {
+  animation: pulse 0.5s ease infinite alternate;
+}
+
+@keyframes pulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+
+/* ======== Power Bar ======== */
+.power-bar-container {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 20px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.power-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--color-success), var(--color-warning), var(--color-danger));
+  transition: width 0.05s linear;
+  border-radius: 10px;
+}
+
+/* ======== Reel Progress ======== */
+.reel-progress {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 12px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.reel-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--color-success);
+  transition: width 0.1s ease;
+  border-radius: 6px;
+}
+
+/* ======== Countdown Overlay ======== */
+.countdown-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 22, 40, 0.8);
+  z-index: 200;
+}
+
+.countdown-number {
+  font-size: 6rem;
+  font-weight: 900;
+  animation: pop 0.5s ease forwards;
+}
+
+/* ======== Mini Scoreboard (in-game) ======== */
+.mini-scoreboard {
+  position: absolute;
+  top: 60px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.mini-score-item {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.mini-score-name {
+  color: var(--color-text-muted);
+}
+
+.mini-score-val {
+  color: var(--color-primary);
+  font-weight: 700;
+  min-width: 2rem;
+  text-align: right;
+}

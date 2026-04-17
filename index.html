@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Castastrophe!</title>
+  <link rel="icon" href="assets/fish/anchovy.png">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+  <!-- ======== HOME VIEW ======== -->
+  <div id="view-home" class="view active">
+    <div class="container">
+      <h1 class="title"><img src="assets/fish/anchovy.png" alt="fish" class="title-icon"> Castastrophe!</h1>
+      <p class="subtitle">A chaotic fishing party game</p>
+
+      <div class="card">
+        <input type="text" id="player-name" class="input" placeholder="Your Name" maxlength="16" autocomplete="off">
+
+        <button id="btn-create" class="btn btn-primary">Create Room</button>
+
+        <div class="divider"><span>or</span></div>
+
+        <input type="text" id="room-code-input" class="input" placeholder="Room Code" maxlength="6" autocomplete="off" style="text-transform: uppercase;">
+        <button id="btn-join" class="btn btn-secondary">Join Room</button>
+      </div>
+
+      <p id="home-error" class="error-msg"></p>
+    </div>
+  </div>
+
+  <!-- ======== LOBBY VIEW ======== -->
+  <div id="view-lobby" class="view">
+    <div class="container">
+      <h2 class="title">Lobby</h2>
+      <div class="room-code-display">
+        Room Code: <span id="lobby-room-code" class="room-code"></span>
+      </div>
+
+      <div id="player-list" class="player-list"></div>
+
+      <div id="host-controls" class="host-controls" style="display: none;">
+        <label class="label">Rounds:
+          <select id="round-count" class="input input-sm">
+            <option value="3">3</option>
+            <option value="5" selected>5</option>
+            <option value="7">7</option>
+            <option value="10">10</option>
+          </select>
+        </label>
+        <button id="btn-start-game" class="btn btn-primary">Start Game</button>
+      </div>
+
+      <p id="lobby-status" class="status-msg">Waiting for host to start...</p>
+      <button id="btn-leave" class="btn btn-danger btn-sm">Leave Room</button>
+    </div>
+  </div>
+
+  <!-- ======== GAME VIEW ======== -->
+  <div id="view-game" class="view">
+    <div class="game-hud">
+      <div class="hud-left">
+        <span id="hud-round">Round 1/5</span>
+      </div>
+      <div class="hud-center">
+        <span id="hud-timer" class="hud-timer">30</span>
+      </div>
+      <div class="hud-right">
+        <span id="hud-score">0 pts</span>
+      </div>
+    </div>
+
+    <div id="game-canvas" class="game-canvas">
+      <!-- Minigame content rendered here -->
+      <div id="game-message" class="game-message"></div>
+      <div id="castastrophe-banner" class="castastrophe-banner" style="display: none;"></div>
+    </div>
+
+    <div id="game-controls" class="game-controls">
+      <button id="btn-cast" class="btn btn-cast"><img src="assets/rod/idle-out.gif" alt="rod" class="btn-icon"> Cast!</button>
+      <button id="btn-reel" class="btn btn-reel" style="display: none;"><img src="assets/rod/reel.gif" alt="reel" class="btn-icon"> Reel!</button>
+    </div>
+  </div>
+
+  <!-- ======== ROUND RESULTS VIEW ======== -->
+  <div id="view-results" class="view">
+    <div class="container">
+      <h2 class="title" id="results-title">Round Results</h2>
+      <div id="results-list" class="results-list"></div>
+      <p id="results-status" class="status-msg"></p>
+    </div>
+  </div>
+
+  <!-- ======== FINAL SCOREBOARD VIEW ======== -->
+  <div id="view-scoreboard" class="view">
+    <div class="container">
+      <h2 class="title"><img src="assets/ui/success-sheet.png" alt="trophy" class="title-icon"> Final Scores</h2>
+      <div id="final-scores" class="results-list"></div>
+      <button id="btn-play-again" class="btn btn-primary">Play Again</button>
+      <button id="btn-home" class="btn btn-secondary">Home</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "rules": {
+    "rooms": {
+      "$roomCode": {
+        ".read": true,
+        ".write": true,
+        "players": {
+          "$playerId": {
+            ".read": true,
+            ".write": true,
+            ".validate": "newData.hasChildren(['name', 'score', 'connected']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 16 && newData.child('score').isNumber() && newData.child('connected').isBoolean()"
+          }
+        }
+      }
+    }
+  }
+}
+
