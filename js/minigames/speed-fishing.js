@@ -43,6 +43,8 @@ export class SpeedFishing extends BaseMinigame {
         <img class="ambient-fish swim-3" src="pixel ocean/peixinhos5.png" alt="">
         <img class="ambient-fish swim-4" src="pixel ocean/peixinhos6.png" alt="">
       </div>
+      <div class="escape-timer"><div class="escape-timer-fill" id="escape-timer-fill"></div></div>
+      <div id="bite-flash" class="bite-flash"></div>
       <img id="rod-anim" class="rod-anim" src="assets/rod/idle-out.gif" alt="">
       <img id="bobber-sprite" class="bobber-sprite" src="assets/ui/bobber.png" alt="" style="display:none">
       <img id="exclamation-sprite" class="exclamation-sprite" src="assets/ui/exclamation.png" alt="" style="display:none">
@@ -100,9 +102,10 @@ export class SpeedFishing extends BaseMinigame {
         state.power = 0;
         state.powerDir = 1;
 
-        // Show power bar
         this._setRodState('preparing');
         this._showPowerBar();
+        showGameMessage('Release to cast!', 0);
+        this._setCastLabel('Casting...');
         this._powerInterval = setInterval(() => {
           state.power += state.powerDir * 3;
           if (state.power >= 100 || state.power <= 0) state.powerDir *= -1;
@@ -121,6 +124,8 @@ export class SpeedFishing extends BaseMinigame {
 
         // Grey out cast button while waiting for a bite
         document.getElementById('btn-cast').classList.add('waiting');
+        this._setCastLabel('Waiting...');
+        showGameMessage('Waiting for a bite...', 0);
 
         // Show cast animation
         this._animateCast(castQuality);
@@ -137,12 +142,14 @@ export class SpeedFishing extends BaseMinigame {
             state.currentCatch = getRandomFish('uncommon');
           }
 
-          this._showBite();
-
           // Escape timer — react fast or lose it
           const escapeTime = (2000 + Math.random() * 1500) * state.escapeSpeedMultiplier;
+          this._showEscapeTimer(escapeTime);
+          this._showBite();
+
           state.escapeTimer = setTimeout(() => {
             if (state.phase === 'bite') {
+              this._hideEscapeTimer();
               showGameMessage('Too slow! Fish escaped!', 1500);
               state.streak = 0;
               this._resetToIdle();
@@ -155,14 +162,18 @@ export class SpeedFishing extends BaseMinigame {
         if (state.phase === 'bite') {
           // Start reeling
           clearTimeout(state.escapeTimer);
+          this._hideEscapeTimer();
           state.phase = 'reeling';
           state.reelProgress = 0;
           this._setRodState('reeling');
           this._showReelProgress();
+          showGameMessage('Keep reeling!', 0);
 
+          const reelBtn = document.getElementById('btn-reel');
           document.getElementById('btn-cast').style.display = 'none';
-          document.getElementById('btn-reel').style.display = 'block';
-          document.getElementById('btn-reel').classList.add('active');
+          reelBtn.style.display = 'block';
+          reelBtn.classList.add('active');
+          reelBtn.classList.remove('urgent');
         }
 
         if (state.phase === 'reeling') {
@@ -177,6 +188,7 @@ export class SpeedFishing extends BaseMinigame {
               state.reelProgress -= 3 + Math.random() * 5;
               state.reelProgress = Math.max(0, state.reelProgress);
               this._updateReelProgress(state.reelProgress);
+              this._flashReelFight();
             }
           }, 300);
 
@@ -230,9 +242,12 @@ export class SpeedFishing extends BaseMinigame {
 
     const castBtn = document.getElementById('btn-cast');
     if (castBtn) castBtn.classList.remove('waiting');
+    this._hideEscapeTimer();
+    this._setCastLabel('Cast!');
+    showGameMessage('Cast again!', 1500);
     document.getElementById('btn-cast').style.display = 'block';
     document.getElementById('btn-reel').style.display = 'none';
-    document.getElementById('btn-reel').classList.remove('active');
+    document.getElementById('btn-reel').classList.remove('active', 'urgent');
 
     this._hideReelProgress();
     this._setRodState('idle');
@@ -298,6 +313,8 @@ export class SpeedFishing extends BaseMinigame {
   }
 
   _showBite() {
+    const rarity = this.localState.currentCatch?.rarity || 'common';
+
     const bobber = document.getElementById('bobber-sprite');
     if (bobber) {
       bobber.classList.remove('floating');
@@ -307,16 +324,21 @@ export class SpeedFishing extends BaseMinigame {
     const exclaim = document.getElementById('exclamation-sprite');
     if (exclaim) {
       exclaim.style.display = 'block';
-      exclaim.classList.remove('show');
-      requestAnimationFrame(() => exclaim.classList.add('show'));
+      exclaim.className = `exclamation-sprite rarity-${rarity}`;
+      void exclaim.offsetWidth; // reflow to restart animation
+      exclaim.classList.add('show');
     }
 
+    this._flashBite();
     this._setRodState('bite');
-    showGameMessage('Bite! Tap Reel!', 0);
+    showGameMessage('BITE! Tap Reel!', 0);
 
-    // Switch buttons
+    // Switch to reel button with urgent pulse
+    document.getElementById('btn-cast').classList.remove('waiting');
     document.getElementById('btn-cast').style.display = 'none';
-    document.getElementById('btn-reel').style.display = 'block';
+    const reelBtn = document.getElementById('btn-reel');
+    reelBtn.style.display = 'block';
+    reelBtn.classList.add('urgent');
   }
 
   _hideBobber() {
@@ -328,7 +350,7 @@ export class SpeedFishing extends BaseMinigame {
     const exclaim = document.getElementById('exclamation-sprite');
     if (exclaim) {
       exclaim.style.display = 'none';
-      exclaim.classList.remove('show');
+      exclaim.className = 'exclamation-sprite';
     }
     const msg = document.getElementById('game-message');
     if (msg) msg.classList.remove('visible');
@@ -353,6 +375,45 @@ export class SpeedFishing extends BaseMinigame {
   _hideReelProgress() {
     const bar = document.querySelector('.reel-progress');
     if (bar) bar.style.display = 'none';
+  }
+
+  // ---- Feedback helpers ----
+
+  _setCastLabel(text) {
+    const lbl = document.getElementById('cast-btn-label');
+    if (lbl) lbl.textContent = text;
+  }
+
+  _showEscapeTimer(durationMs) {
+    const timer = document.querySelector('.escape-timer');
+    const fill  = document.getElementById('escape-timer-fill');
+    if (!timer || !fill) return;
+    fill.style.transition = 'none';
+    fill.style.width = '100%';
+    timer.style.display = 'block';
+    void fill.offsetWidth; // force reflow before starting transition
+    fill.style.transition = `width ${durationMs}ms linear`;
+    fill.style.width = '0%';
+  }
+
+  _hideEscapeTimer() {
+    const timer = document.querySelector('.escape-timer');
+    if (timer) timer.style.display = 'none';
+  }
+
+  _flashBite() {
+    const flash = document.getElementById('bite-flash');
+    if (!flash) return;
+    flash.classList.remove('active');
+    void flash.offsetWidth;
+    flash.classList.add('active');
+  }
+
+  _flashReelFight() {
+    const fill = document.querySelector('.reel-progress-fill');
+    if (!fill) return;
+    fill.classList.add('fight');
+    setTimeout(() => fill.classList.remove('fight'), 300);
   }
 
   cleanup() {

@@ -102,24 +102,16 @@
 }
 
 /* ======== Rod Animation ======== */
-/*
- * The rod GIFs have sky + ocean baked into their background.
- * By sizing to 75% height (not full-canvas), and using a mask that fades
- * from transparent at the top (hiding the sky/horizon ~35% of the GIF)
- * to opaque below it, the pixel ocean background shows above the rod.
- */
 .rod-anim {
   position: absolute;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  height: 75%;
+  height: 80%;
   width: auto;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   z-index: 1;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 34%, black 44%);
-  mask-image: linear-gradient(to bottom, transparent 34%, black 44%);
 }
 
 /* ======== Bobber Sprite ======== */
@@ -395,7 +387,7 @@
   height: 100%;
   width: 0%;
   background: var(--color-success);
-  transition: width 0.1s ease;
+  transition: width 0.1s ease, background 0.3s ease;
   border-radius: 6px;
 }
 
@@ -443,4 +435,79 @@
   font-weight: 700;
   min-width: 2rem;
   text-align: right;
+}
+
+/* ======== Escape Timer Bar ======== */
+/* Drains left-to-right over the bite window duration */
+.escape-timer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: rgba(0,0,0,0.3);
+  z-index: 20;
+  display: none;
+}
+
+.escape-timer-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #ef4444, #f97316, #eab308);
+  transform-origin: left;
+}
+
+/* ======== Bite Edge Flash ======== */
+.bite-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.bite-flash.active {
+  animation: biteEdgePulse 0.5s ease-out forwards;
+}
+
+@keyframes biteEdgePulse {
+  0%   { box-shadow: inset 0 0 70px rgba(239,68,68,0.8); }
+  100% { box-shadow: inset 0 0 0px rgba(239,68,68,0); }
+}
+
+/* ======== Exclamation Rarity Tints ======== */
+.exclamation-sprite.rarity-uncommon {
+  filter: drop-shadow(0 0 5px #60a5fa) brightness(1.2);
+}
+.exclamation-sprite.rarity-rare {
+  filter: drop-shadow(0 0 8px #f59e0b) brightness(1.4);
+  width: 22px;
+}
+.exclamation-sprite.rarity-legendary {
+  filter: drop-shadow(0 0 12px #a855f7) brightness(1.6) saturate(1.5);
+  width: 26px;
+  animation: legendaryPulse 0.25s ease forwards, exclamPop 0.25s ease forwards !important;
+}
+.exclamation-sprite.rarity-junk {
+  filter: grayscale(0.8) brightness(0.7);
+}
+
+@keyframes legendaryPulse {
+  0%, 100% { filter: drop-shadow(0 0 12px #a855f7) brightness(1.6); }
+  50%       { filter: drop-shadow(0 0 20px #f0abfc) brightness(2); }
+}
+
+/* ======== Reel Fight Flash ======== */
+.reel-progress-fill.fight {
+  background: #ef4444;
+  transition: background 0s;
+}
+
+/* ======== Urgent Reel Pulse (bite phase) ======== */
+.btn-reel.urgent {
+  animation: urgentPulse 0.35s ease infinite alternate;
+}
+
+@keyframes urgentPulse {
+  from { transform: scale(1);    background: var(--color-success); }
+  to   { transform: scale(1.06); background: #ef4444; }
 }
