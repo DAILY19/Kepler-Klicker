@@ -102,16 +102,31 @@
 }
 
 /* ======== Rod Animation ======== */
-.rod-anim {
+/*
+ * .rod-clip — fixed-size viewport anchored to the canvas bottom-center.
+ * .rod-anim  — the horizontal PNG strip inside it; JS shifts it left
+ *              frame-by-frame to play animations with true RGBA transparency.
+ */
+.rod-clip {
   position: absolute;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   height: 80%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  z-index: 1;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.rod-anim {
+  display: block;
+  height: 100%;
   width: auto;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  z-index: 1;
+  /* JS sets transform: translateX(-N * frameWidth) to show the Nth frame */
 }
 
 /* ======== Bobber Sprite ======== */

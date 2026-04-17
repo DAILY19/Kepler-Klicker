@@ -42,7 +42,9 @@ export class BiggestCatch extends BaseMinigame {
       </div>
       <div class="escape-timer"><div class="escape-timer-fill" id="escape-timer-fill"></div></div>
       <div id="bite-flash" class="bite-flash"></div>
-      <img id="rod-anim" class="rod-anim" src="assets/rod/idle-out.gif" alt="">
+      <div class="rod-clip" id="rod-clip">
+        <img id="rod-anim" class="rod-anim" src="assets/rod/idle-out.png" alt="">
+      </div>
       <img id="bobber-sprite" class="bobber-sprite" src="assets/ui/bobber.png" alt="" style="display:none">
       <img id="exclamation-sprite" class="exclamation-sprite" src="assets/ui/exclamation.png" alt="" style="display:none">
       <div id="game-message" class="game-message"></div>
@@ -66,6 +68,13 @@ export class BiggestCatch extends BaseMinigame {
     btnReel.addEventListener('click', this._onReel);
 
     this._powerInterval = null;
+
+    // Preload all rod strips
+    ['antic','cast','idle-out','idle-in','set-hook','reel','catch'].forEach(n => {
+      const img = new Image(); img.src = `assets/rod/${n}.png`;
+    });
+    this._rodFrameTimer = null;
+    this._rodFrameIdx   = 0;
 
     showGameMessage(BiggestCatch.description, 0);
   }
@@ -212,22 +221,43 @@ export class BiggestCatch extends BaseMinigame {
 
   // ---- Visual helpers ----
 
+  /** Swap the rod PNG strip and start the frame animator */
   _setRodState(stateName) {
-    const rodMap = {
-      idle:      'assets/rod/idle-out.gif',
-      preparing: 'assets/rod/antic.gif',
-      cast:      'assets/rod/cast.gif',
-      waiting:   'assets/rod/idle-in.gif',
-      bite:      'assets/rod/set-hook.gif',
-      reeling:   'assets/rod/reel.gif',
-      catch:     'assets/rod/catch.gif',
+    const config = {
+      idle:      { src: 'assets/rod/idle-out.png', frames: 12, delay: 180, loop: true  },
+      preparing: { src: 'assets/rod/antic.png',    frames: 12, delay: 100, loop: true  },
+      cast:      { src: 'assets/rod/cast.png',     frames: 12, delay:  70, loop: false },
+      waiting:   { src: 'assets/rod/idle-in.png',  frames: 12, delay: 220, loop: true  },
+      bite:      { src: 'assets/rod/set-hook.png', frames: 12, delay:  70, loop: true  },
+      reeling:   { src: 'assets/rod/reel.png',     frames: 12, delay: 110, loop: true  },
+      catch:     { src: 'assets/rod/catch.png',    frames: 12, delay: 140, loop: false },
     };
-    const rod = document.getElementById('rod-anim');
-    if (rod) {
-      const src = rodMap[stateName] || rodMap.idle;
-      rod.src = '';
-      rod.src = src;
+    const c = config[stateName] || config.idle;
+    clearInterval(this._rodFrameTimer);
+    this._rodFrameIdx = 0;
+
+    const strip = document.getElementById('rod-anim');
+    const clip  = document.getElementById('rod-clip');
+    if (!strip || !clip) return;
+    if (!strip.src.endsWith(c.src.split('/').pop())) {
+      strip.src = c.src;
     }
+
+    const advance = () => {
+      const fw = clip.offsetWidth;
+      strip.style.transform = `translateX(${-this._rodFrameIdx * fw}px)`;
+      if (this._rodFrameIdx < c.frames - 1) {
+        this._rodFrameIdx++;
+      } else if (c.loop) {
+        this._rodFrameIdx = 0;
+      } else {
+        clearInterval(this._rodFrameTimer);
+        this._rodFrameTimer = null;
+        return;
+      }
+    };
+    advance();
+    this._rodFrameTimer = setInterval(advance, c.delay);
   }
 
   _showPowerBar() {
@@ -350,6 +380,7 @@ export class BiggestCatch extends BaseMinigame {
 
   cleanup() {
     super.cleanup();
+    clearInterval(this._rodFrameTimer);
     clearInterval(this._powerInterval);
 
     const btnCast = document.getElementById('btn-cast');
