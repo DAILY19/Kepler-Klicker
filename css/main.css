@@ -98,19 +98,18 @@ body {
 }
 
 .header-inner {
-  position: relative;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 78px;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding-top: 0.25rem;
 }
 
 .header-center {
+  flex: 1;
   text-align: center;
   pointer-events: none;
-  /* each side bar is 36px wide + 6px breathing room = 42px per side */
-  padding: 0 42px;
-  width: 100%;
+  min-width: 0;
 }
 
 .title {
@@ -417,23 +416,17 @@ body {
 }
 
 /* ======== Settings Bar ======== */
-/* Mobile: vertical single column so each bar is only 36px wide */
 #settings-bar-left,
 #settings-bar {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.25rem;
+  flex-shrink: 0;
 }
 
-#settings-bar-left { left: 0; }
-#settings-bar      { right: 0; }
-
 .btn-icon {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   padding: 0;
   border: none;
   background: none;
@@ -476,24 +469,14 @@ body {
 /* ======== Responsive (tablet+) ======== */
 @media (min-width: 600px) {
   .header-inner {
-    justify-content: space-between;
     align-items: center;
-    min-height: 58px;
-  }
-
-  .header-center {
-    flex: 1;
-    padding: 0;
+    padding-top: 0;
   }
 
   #settings-bar-left,
   #settings-bar {
-    position: static;
-    transform: none;
     flex-direction: row;
-    flex-wrap: nowrap;
     gap: 0.3rem;
-    width: auto;
   }
 
   .title {
