@@ -1,38 +1,37 @@
-# Castastrophe! - Copilot Instructions
+﻿# Kepler Klicker - Copilot Instructions
 
 ## Project Overview
-Castastrophe! is a browser-based multiplayer party game platform. It provides room/lobby infrastructure via Firebase — players join on their phones via a room code. Game logic is to be built on top of this foundation.
+Kepler Klicker is a browser-based space-themed incremental clicker game. Players click a planet to earn stardust, purchase upgrades for passive income, and progress through planet skins.
 
 ## Tech Stack
 - HTML5, CSS3, vanilla JavaScript (no frameworks)
-- Firebase Realtime Database for multiplayer sync
+- localStorage for save/load
 - GitHub Pages for hosting
 - Mobile-first responsive design
 
 ## Architecture
-- Single-page app with view switching (no routing library)
-- Firebase handles all real-time state synchronization
-- Host player is the authority for game state transitions
-- `onGameStart()` callback in app.js is the hook for game logic
+- Single-page app with no routing
+- All game state in a single `game` object in app.js
+- Save/load via localStorage (auto-save every 30s + on page close)
+- Upgrade system with exponential cost scaling (1.15x per purchase)
 
 ## Code Conventions
-- Use ES6+ features (const/let, arrow functions, template literals, async/await)
-- No build tools — plain browser-compatible JS with ES modules via `<script type="module">`
+- Use ES6+ features (const/let, arrow functions, template literals)
+- No build tools — plain browser-compatible JS
 - CSS uses custom properties for theming
 - Mobile-first CSS (min-width media queries for larger screens)
+- Pixel art assets use `image-rendering: pixelated`
 
 ## File Structure
 - `index.html` — Single HTML entry point
-- `css/main.css` — Global styles & components
-- `js/` — JavaScript modules
-  - `firebase-config.js` — Firebase initialization
-  - `app.js` — Main app controller and view routing
-  - `room.js` — Room creation/joining
-  - `lobby.js` — Lobby management
-  - `ui.js` — UI utilities and animations
-- `assets/ui/` — UI icons
+- `css/main.css` — All styles
+- `js/app.js` — All game logic (upgrades, clicks, save/load, shop UI)
+- `assets/Environment/` — Planet, asteroid, background pixel art
+- `assets/Loops/` — Background music loops
+- `assets/Tracks/` — Music tracks
 
 ## Key Patterns
-- Host player is the authority for game state transitions
-- All game state flows through Firebase Realtime Database
-- Input handling is optimized for touch (tap, hold, swipe)
+- Game loop uses requestAnimationFrame for passive income
+- Floating numbers spawn at click position and animate upward
+- Planet skin changes at total stardust milestones
+- Shop panel slides up/down from bottom of screen

@@ -1,12 +1,11 @@
 {
-  "name": "castastrophe",
+  "name": "kepler-klicker",
   "version": "1.0.0",
   "private": true,
-  "description": "Castastrophe! - Browser-based multiplayer fishing party game",
+  "description": "Kepler Klicker - A space-themed incremental clicker game",
   "scripts": {
     "start": "powershell -ExecutionPolicy Bypass -File start.ps1",
-    "serve": "npx http-server . -p 8080 -c-1 --cors",
-    "deploy:rules": "firebase deploy --only database"
+    "serve": "npx http-server . -p 8080 -c-1 --cors"
   },
   "devDependencies": {
     "http-server": "^14.1.1"
