@@ -45,8 +45,9 @@ OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "assets", "rod")
 def make_transparent(img):
     img = img.convert("RGBA")
     cleaned = [
-        (255, 255, 255, 0) if r >= WHITE_THRESH and g >= WHITE_THRESH and b >= WHITE_THRESH
-        else (r, g, b, 255)
+        # Also remove near-white opaque pixels (fringe on white-bg sheets)
+        (r, g, b, 0) if a > 0 and r >= WHITE_THRESH and g >= WHITE_THRESH and b >= WHITE_THRESH
+        else (r, g, b, a)   # preserve existing alpha (transparent bg stays transparent)
         for r, g, b, a in img.getdata()
     ]
     img.putdata(cleaned)

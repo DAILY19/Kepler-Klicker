@@ -237,13 +237,13 @@ export class BiggestCatch extends BaseMinigame {
   /** Animate the rod using canvas drawImage — guaranteed transparent background */
   _setRodState(stateName) {
     const config = {
-      idle:      { key: 'idle-out', frames: 12, delay: 180, loop: true  },
-      preparing: { key: 'antic',    frames: 12, delay: 100, loop: true  },
+      idle:      { key: 'idle-out', frames:  4, delay: 180, loop: true  },
+      preparing: { key: 'antic',    frames:  7, delay: 100, loop: true  },
       cast:      { key: 'cast',     frames: 12, delay:  70, loop: false },
-      waiting:   { key: 'idle-in',  frames: 12, delay: 220, loop: true  },
-      bite:      { key: 'set-hook', frames: 12, delay:  70, loop: true  },
-      reeling:   { key: 'reel',     frames: 12, delay: 110, loop: true  },
-      catch:     { key: 'catch',    frames: 12, delay: 140, loop: false },
+      waiting:   { key: 'idle-in',  frames:  2, delay: 220, loop: true  },
+      bite:      { key: 'set-hook', frames:  6, delay:  70, loop: true  },
+      reeling:   { key: 'reel',     frames:  5, delay: 110, loop: true  },
+      catch:     { key: 'catch',    frames:  3, delay: 140, loop: false },
     };
     const c = config[stateName] || config.idle;
     clearInterval(this._rodFrameTimer);
