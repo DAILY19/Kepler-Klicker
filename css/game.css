@@ -123,16 +123,16 @@
 /* ======== Bobber Sprite ======== */
 .bobber-sprite {
   position: absolute;
-  width: 24px;
-  height: 24px;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  top: 55%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,0.5));
   transition: top 0.4s ease, left 0.5s ease;
 }
 

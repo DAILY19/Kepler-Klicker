@@ -80,10 +80,28 @@ export class SpeedFishing extends BaseMinigame {
     btnCast.style.display = 'block';
     btnReel.style.display = 'none';
 
-    // Bind inputs
-    this._onCastDown = () => this.onInput('castStart');
-    this._onCastUp = () => this.onInput('castRelease');
-    this._onReel = () => this.onInput('reel');
+    // Bind inputs with small debounce buffers to prevent accidental double-fires
+    this._lastCastDown   = 0;
+    this._lastCastUp     = 0;
+    this._lastReel       = 0;
+    this._onCastDown = () => {
+      const now = Date.now();
+      if (now - this._lastCastDown < 200) return;
+      this._lastCastDown = now;
+      this.onInput('castStart');
+    };
+    this._onCastUp = () => {
+      const now = Date.now();
+      if (now - this._lastCastUp < 200) return;
+      this._lastCastUp = now;
+      this.onInput('castRelease');
+    };
+    this._onReel = () => {
+      const now = Date.now();
+      if (now - this._lastReel < 150) return;
+      this._lastReel = now;
+      this.onInput('reel');
+    };
 
     btnCast.addEventListener('touchstart', this._onCastDown, { passive: true });
     btnCast.addEventListener('mousedown', this._onCastDown);
