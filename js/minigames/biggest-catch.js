@@ -207,7 +207,7 @@ export class BiggestCatch extends BaseMinigame {
           state.reelProgress = Math.max(0, Math.min(100, state.reelProgress));
           this._updateReelProgress(state.reelProgress);
 
-          // Bigger fish fights harder
+          // Bigger fish fights harder — snappy feedback
           const fishResist = state.currentCatch?.rarity === 'rare' ? 8 : 4;
           setTimeout(() => {
             if (state.phase === 'reeling') {
@@ -216,7 +216,7 @@ export class BiggestCatch extends BaseMinigame {
               this._updateReelProgress(state.reelProgress);
               this._flashReelFight();
             }
-          }, 300);
+          }, 150);
 
           if (state.reelProgress >= 100) {
             this._completeCatch();
@@ -238,17 +238,18 @@ export class BiggestCatch extends BaseMinigame {
     this._setRodState('catch');
     showCatchDisplay(fish.emoji, `${fish.name} (${fish.actualWeight} lbs)`, points, fish.image || null);
 
-    await updateScore(this.roomCode, this.playerId, points);
-    await updateRoundScore(this.roomCode, this.playerId, 'current', {
+    document.getElementById('hud-score').textContent = `${points} pts`;
+
+    // End after showing catch — don't block on Firebase
+    setTimeout(() => this.end(), 3000);
+
+    // Fire-and-forget Firebase update
+    updateScore(this.roomCode, this.playerId, points);
+    updateRoundScore(this.roomCode, this.playerId, 'current', {
       fishName: fish.name,
       weight: fish.actualWeight,
       points
     });
-
-    document.getElementById('hud-score').textContent = `${points} pts`;
-
-    // End after showing catch
-    setTimeout(() => this.end(), 3000);
   }
 
   // ---- Visual helpers ----
@@ -323,14 +324,15 @@ export class BiggestCatch extends BaseMinigame {
     const bobber = document.getElementById('bobber-sprite');
     if (bobber) {
       bobber.style.display = 'block';
-      bobber.style.top = `${50 + quality * 10}%`;
-      bobber.style.left = `${45 + quality * 10}%`;
+      // Always centered horizontally; quality only affects vertical depth
+      bobber.style.top  = `${52 + quality * 8}%`;
+      bobber.style.left = '50%';
     }
     setTimeout(() => {
       this._setRodState('waiting');
       const b = document.getElementById('bobber-sprite');
       if (b) b.classList.add('floating');
-    }, 600);
+    }, 500);
   }
 
   _showBite() {

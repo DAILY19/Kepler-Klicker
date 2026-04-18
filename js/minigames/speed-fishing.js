@@ -222,7 +222,7 @@ export class SpeedFishing extends BaseMinigame {
           state.reelProgress = Math.max(0, Math.min(100, state.reelProgress));
           this._updateReelProgress(state.reelProgress);
 
-          // Fish fights back slightly
+          // Fish fights back slightly — immediate to feel snappy
           setTimeout(() => {
             if (state.phase === 'reeling') {
               state.reelProgress -= 3 + Math.random() * 5;
@@ -230,7 +230,7 @@ export class SpeedFishing extends BaseMinigame {
               this._updateReelProgress(state.reelProgress);
               this._flashReelFight();
             }
-          }, 300);
+          }, 150);
 
           if (state.reelProgress >= 100) {
             this._catchFish();
@@ -259,18 +259,19 @@ export class SpeedFishing extends BaseMinigame {
     this._setRodState('catch');
     showCatchDisplay(fish.emoji, fish.name, points, fish.image || null);
 
-    // Update Firebase
-    await updateScore(this.roomCode, this.playerId, points);
-    await updateRoundScore(this.roomCode, this.playerId, 'current', {
+    // Update HUD immediately
+    document.getElementById('hud-score').textContent = `${state.roundScore} pts`;
+
+    // Reset UI after showing the catch — don't wait on Firebase
+    setTimeout(() => this._resetToIdle(), 1800);
+
+    // Fire-and-forget Firebase update
+    updateScore(this.roomCode, this.playerId, points);
+    updateRoundScore(this.roomCode, this.playerId, 'current', {
       catches: state.catches,
       roundScore: state.roundScore,
       lastCatch: fish.name
     });
-
-    // Update HUD
-    document.getElementById('hud-score').textContent = `${state.roundScore} pts`;
-
-    setTimeout(() => this._resetToIdle(), 500);
   }
 
   _resetToIdle() {
@@ -366,15 +367,16 @@ export class SpeedFishing extends BaseMinigame {
     const bobber = document.getElementById('bobber-sprite');
     if (bobber) {
       bobber.style.display = 'block';
-      bobber.style.top = `${50 + quality * 10}%`;
-      bobber.style.left = `${45 + quality * 10}%`;
+      // Always centered horizontally; quality only affects vertical depth
+      bobber.style.top  = `${52 + quality * 8}%`;
+      bobber.style.left = '50%';
     }
-    // Transition to idle-in once cast animation plays (~600ms), then start bobber float
+    // Transition to idle-in once cast animation plays (~500ms), then start bobber float
     setTimeout(() => {
       this._setRodState('waiting');
       const b = document.getElementById('bobber-sprite');
       if (b) b.classList.add('floating');
-    }, 600);
+    }, 500);
   }
 
   _showBite() {
