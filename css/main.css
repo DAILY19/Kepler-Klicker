@@ -94,7 +94,7 @@ body {
   right: 0;
   z-index: 10;
   padding: 0.5rem 0.75rem;
-  background: linear-gradient(to bottom, rgba(5, 11, 24, 0.97) 70%, transparent);
+  background: linear-gradient(to bottom, rgba(5, 11, 24, 1) 65%, rgba(5, 11, 24, 0.7) 85%, transparent);
 }
 
 .header-inner {
@@ -108,8 +108,8 @@ body {
 .header-center {
   text-align: center;
   pointer-events: none;
-  /* padding both sides so buttons (abs-right) don't overlap centered text */
-  padding: 0 124px;
+  /* each side bar is 36px wide + 6px breathing room = 42px per side */
+  padding: 0 42px;
   width: 100%;
 }
 
@@ -118,12 +118,37 @@ body {
   font-size: 1.25rem;
   font-weight: 800;
   margin-bottom: 0.25rem;
-  background: linear-gradient(135deg, #7edbff, #b39dff);
+  /* Gradient fill — filter:drop-shadow breaks transparent-fill text on mobile,
+     so we fake the glow with text-shadow on a wrapper span instead */
+  background: linear-gradient(135deg, #7edbff, #c4aaff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: 0.08em;
-  filter: drop-shadow(0 0 10px rgba(79, 195, 247, 0.7)) drop-shadow(0 0 20px rgba(124, 77, 255, 0.4));
+}
+
+/* Glow effect: pseudo-element behind the gradient text.
+   text-shadow doesn't work with -webkit-text-fill-color:transparent,
+   so we layer a blurred copy using ::before on the inner span. */
+.title-glow {
+  position: relative;
+  display: inline-block;
+}
+
+.title-glow::before {
+  content: 'Kepler Klicker';
+  position: absolute;
+  inset: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  color: #4fc3f7;
+  text-shadow: 0 0 16px rgba(79, 195, 247, 0.9), 0 0 32px rgba(124, 77, 255, 0.5);
+  /* sits behind the gradient text layer */
+  z-index: -1;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .stats-bar {
@@ -392,13 +417,14 @@ body {
 }
 
 /* ======== Settings Bar ======== */
+/* Mobile: vertical single column so each bar is only 36px wide */
 #settings-bar-left,
 #settings-bar {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  display: grid;
-  grid-template-columns: repeat(3, 36px);
+  display: flex;
+  flex-direction: column;
   gap: 0.3rem;
 }
 
@@ -464,10 +490,9 @@ body {
   #settings-bar {
     position: static;
     transform: none;
-    display: flex;
+    flex-direction: row;
     flex-wrap: nowrap;
     gap: 0.3rem;
-    grid-template-columns: unset;
     width: auto;
   }
 
