@@ -3,56 +3,67 @@
 // ============================================================
 
 // ---- Upgrade Definitions ----
+// type: 'dps'          — flat passive stardust/sec per owned
+// type: 'click'        — flat bonus click power per owned
+// type: 'dps_multi'    — multiplies total DPS (e.g. mult:1.10 = +10% per owned)
+// type: 'click_multi'  — multiplies click power (e.g. mult:1.20 = +20% per owned)
 const UPGRADES = [
+  // ---- Passive Income ----
   {
-    id: 'probe',
-    name: 'Mining Probe',
-    desc: '+1 stardust/sec',
+    id: 'mining_pick',
+    name: 'Mining Pick',
+    desc: '+1/sec each',
+    type: 'dps',
     baseCost: 15,
     costScale: 1.15,
     dps: 1,
     icon: 'assets/Icons/Icon31_01.png',
   },
   {
-    id: 'drone',
-    name: 'Harvester Drone',
-    desc: '+5 stardust/sec',
+    id: 'excavator',
+    name: 'Excavator Drone',
+    desc: '+5/sec each',
+    type: 'dps',
     baseCost: 100,
     costScale: 1.15,
     dps: 5,
     icon: 'assets/Icons/Icon31_05.png',
   },
   {
-    id: 'station',
-    name: 'Orbital Station',
-    desc: '+25 stardust/sec',
+    id: 'rocket_probe',
+    name: 'Rocket Probe',
+    desc: '+25/sec each',
+    type: 'dps',
     baseCost: 500,
     costScale: 1.15,
     dps: 25,
     icon: 'assets/Icons/Icon31_04.png',
   },
   {
-    id: 'colony',
-    name: 'Ice Colony',
-    desc: '+100 stardust/sec',
+    id: 'cryo_drill',
+    name: 'Cryo Drill',
+    desc: '+100/sec each',
+    type: 'dps',
     baseCost: 2500,
     costScale: 1.15,
     dps: 100,
-    icon: 'assets/Icons/Icon31_25.png',
+    icon: 'assets/Icons/Icon31_07.png',
   },
   {
-    id: 'forge',
+    id: 'lava_forge',
     name: 'Lava Forge',
-    desc: '+400 stardust/sec',
+    desc: '+400/sec each',
+    type: 'dps',
     baseCost: 12000,
     costScale: 1.15,
     dps: 400,
     icon: 'assets/Icons/Icon31_35.png',
   },
   {
-    id: 'terraformer',
-    name: 'Terraformer',
-    desc: '+1,600 stardust/sec',
+    id: 'xenite_forge',
+    name: 'Xenite Forge',
+    desc: '+1,600/sec each',
+    type: 'dps',
     baseCost: 55000,
     costScale: 1.15,
     dps: 1600,
@@ -61,11 +72,95 @@ const UPGRADES = [
   {
     id: 'singularity',
     name: 'Singularity Engine',
-    desc: '+6,666 stardust/sec',
+    desc: '+6,666/sec each',
+    type: 'dps',
     baseCost: 250000,
     costScale: 1.15,
     dps: 6666,
     icon: 'assets/Icons/Icon31_09.png',
+  },
+  // ---- Click Power (flat bonus per owned) ----
+  {
+    id: 'mining_gloves',
+    name: 'Mining Gloves',
+    desc: '+2 click each',
+    type: 'click',
+    baseCost: 75,
+    costScale: 1.20,
+    clickBonus: 2,
+    icon: 'assets/Icons/Icon31_16.png',
+  },
+  {
+    id: 'star_crystal',
+    name: 'Star Crystal',
+    desc: '+10 click each',
+    type: 'click',
+    baseCost: 800,
+    costScale: 1.20,
+    clickBonus: 10,
+    icon: 'assets/Icons/Icon31_21.png',
+  },
+  {
+    id: 'plasma_drill',
+    name: 'Plasma Drill',
+    desc: '+50 click each',
+    type: 'click',
+    baseCost: 8000,
+    costScale: 1.20,
+    clickBonus: 50,
+    icon: 'assets/Icons/Icon31_06.png',
+  },
+  {
+    id: 'void_cannon',
+    name: 'Void Cannon',
+    desc: '+250 click each',
+    type: 'click',
+    baseCost: 80000,
+    costScale: 1.20,
+    clickBonus: 250,
+    icon: 'assets/Icons/Icon31_10.png',
+  },
+  // ---- DPS Multipliers ----
+  {
+    id: 'nebula_turbine',
+    name: 'Nebula Turbine',
+    desc: '+10% all/sec each',
+    type: 'dps_multi',
+    baseCost: 5000,
+    costScale: 1.25,
+    mult: 1.10,
+    icon: 'assets/Icons/Icon31_03.png',
+  },
+  {
+    id: 'alien_symbiont',
+    name: 'Alien Symbiont',
+    desc: '+15% all/sec each',
+    type: 'dps_multi',
+    baseCost: 100000,
+    costScale: 1.25,
+    mult: 1.15,
+    icon: 'assets/Icons/Icon31_36.png',
+  },
+  // ---- Click Multipliers ----
+  {
+    id: 'ice_crystal',
+    name: 'Ice Crystal',
+    desc: '+20% click each',
+    type: 'click_multi',
+    baseCost: 3500,
+    costScale: 1.25,
+    mult: 1.20,
+    icon: 'assets/Icons/Icon31_23.png',
+  },
+  {
+    id: 'plasma_catalyst',
+    name: 'Plasma Catalyst',
+    desc: '+25% click each',
+    type: 'click_multi',
+    baseCost: 35000,
+    costScale: 1.25,
+    mult: 1.25,
+    icon: 'assets/Icons/Icon31_34.png',
   },
 ];
 
@@ -82,7 +177,6 @@ const PLANET_SKINS = [
 let game = {
   stardust: 0,
   totalStardust: 0,
-  clickPower: 1,
   owned: {},       // { upgradeId: count }
   musicOn: false,
   sfxOn: true,
@@ -247,11 +341,28 @@ function getCost(upgrade) {
 
 // ---- DPS Calculation ----
 function getDPS() {
-  let dps = 0;
+  let base = 0;
+  let mult = 1;
   for (const up of UPGRADES) {
-    dps += (game.owned[up.id] || 0) * up.dps;
+    const owned = game.owned[up.id] || 0;
+    if (!owned) continue;
+    if (up.type === 'dps') base += owned * up.dps;
+    else if (up.type === 'dps_multi') mult *= Math.pow(up.mult, owned);
   }
-  return dps;
+  return base * mult;
+}
+
+// ---- Click Power Calculation (computed from upgrades, not stored) ----
+function getClickPower() {
+  let base = 1;
+  let mult = 1;
+  for (const up of UPGRADES) {
+    const owned = game.owned[up.id] || 0;
+    if (!owned) continue;
+    if (up.type === 'click') base += owned * up.clickBonus;
+    else if (up.type === 'click_multi') mult *= Math.pow(up.mult, owned);
+  }
+  return Math.max(1, Math.floor(base * mult));
 }
 
 // ---- UI Updates ----
@@ -282,8 +393,9 @@ function handleClick(e) {
   e.preventDefault();
   initSFX();
 
-  game.stardust += game.clickPower;
-  game.totalStardust += game.clickPower;
+  const cp = getClickPower();
+  game.stardust += cp;
+  game.totalStardust += cp;
 
   // Animate planet
   elPlanetWrap.classList.remove('clicked');
@@ -293,15 +405,15 @@ function handleClick(e) {
   playSFX('click');
 
   // Floating number
-  spawnFloatNumber(e);
+  spawnFloatNumber(e, cp);
 
   updateDisplay();
 }
 
-function spawnFloatNumber(e) {
+function spawnFloatNumber(e, amount) {
   const num = document.createElement('div');
   num.className = 'float-number';
-  num.textContent = '+' + formatNum(game.clickPower);
+  num.textContent = '+' + formatNum(amount);
 
   // Position near click/touch
   let x, y;
@@ -323,12 +435,20 @@ function spawnFloatNumber(e) {
 }
 
 // ---- Shop ----
+const TYPE_BADGE = {
+  dps:         { label: 'PASSIVE',    cls: 'badge-dps' },
+  click:       { label: 'CLICK +',    cls: 'badge-click' },
+  dps_multi:   { label: 'DPS ×',      cls: 'badge-dps-multi' },
+  click_multi: { label: 'CLICK ×',    cls: 'badge-click-multi' },
+};
+
 function renderShop() {
   elShopList.innerHTML = '';
   for (const up of UPGRADES) {
     const cost = getCost(up);
     const owned = game.owned[up.id] || 0;
     const canAfford = game.stardust >= cost;
+    const badge = TYPE_BADGE[up.type] || TYPE_BADGE.dps;
 
     const item = document.createElement('div');
     item.className = 'upgrade-item' + (canAfford ? '' : ' locked');
@@ -336,7 +456,7 @@ function renderShop() {
       <img class="upgrade-icon" src="${up.icon}" alt="${up.name}" draggable="false">
       <div class="upgrade-info">
         <div class="upgrade-name">${up.name}</div>
-        <div class="upgrade-desc">${up.desc}</div>
+        <div class="upgrade-desc"><span class="upgrade-badge ${badge.cls}">${badge.label}</span>${up.desc}</div>
       </div>
       <div class="upgrade-meta">
         <div class="upgrade-cost">${formatNum(cost)}</div>
@@ -402,7 +522,6 @@ function saveGame() {
   const data = {
     stardust: game.stardust,
     totalStardust: game.totalStardust,
-    clickPower: game.clickPower,
     owned: game.owned,
     sfxOn: game.sfxOn,
     savedAt: Date.now(),
@@ -417,7 +536,6 @@ function loadGame() {
     const data = JSON.parse(raw);
     game.stardust = data.stardust || 0;
     game.totalStardust = data.totalStardust || 0;
-    game.clickPower = data.clickPower || 1;
     game.owned = data.owned || {};
     if (data.sfxOn !== undefined) game.sfxOn = data.sfxOn;
 
@@ -441,7 +559,6 @@ function resetGame() {
   game = {
     stardust: 0,
     totalStardust: 0,
-    clickPower: 1,
     owned: {},
     musicOn: game.musicOn,
     sfxOn: game.sfxOn,
