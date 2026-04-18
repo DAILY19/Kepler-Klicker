@@ -1,5 +1,5 @@
 # ============================================================
-# Castastrophe! - Refresh / update / clear cache
+# Kepler Klicker - Refresh / update / clear cache
 # Stops the server, wipes temp logs, reinstalls deps if needed,
 # then restarts and reopens the browser with a cache-bust param.
 # Usage: .\refresh.ps1
@@ -12,9 +12,9 @@ param(
 )
 
 $rootDir   = $PSScriptRoot
-$PidFile   = Join-Path $rootDir '.castastrophe.pid'
-$logFile   = Join-Path $env:TEMP 'castastrophe-http.log'
-$errFile   = Join-Path $env:TEMP 'castastrophe-http-err.log'
+$PidFile   = Join-Path $rootDir '.kepler-klicker.pid'
+$logFile   = Join-Path $env:TEMP 'kepler-klicker-http.log'
+$errFile   = Join-Path $env:TEMP 'kepler-klicker-http-err.log'
 
 # ---- Helper: stop any running server ------------------------------
 
@@ -48,7 +48,7 @@ function Get-LocalIP {
 # ===================================================================
 
 Write-Host ""
-Write-Host "  Castastrophe! Refresh" -ForegroundColor Cyan
+Write-Host "  Kepler Klicker Refresh" -ForegroundColor Cyan
 Write-Host ""
 
 # 1. Stop existing server

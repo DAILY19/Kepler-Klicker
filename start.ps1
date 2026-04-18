@@ -1,17 +1,16 @@
 # ============================================================
-# Castastrophe! - Quick start (run from project root)
+# Kepler Klicker - Quick start (run from project root)
 # Usage: .\start.ps1
 #        .\start.ps1 -Port 3000
 #        .\start.ps1 -NoBrowser
 # Companion scripts: .\stop.ps1  |  .\refresh.ps1
-# Share the Network URL with phones on the same WiFi.
 # ============================================================
 param(
     [int]$Port = 8080,
     [switch]$NoBrowser
 )
 
-$PidFile = Join-Path $PSScriptRoot '.castastrophe.pid'
+$PidFile = Join-Path $PSScriptRoot '.kepler-klicker.pid'
 
 $ErrorActionPreference = 'Continue'
 $rootDir = $PSScriptRoot
@@ -77,8 +76,8 @@ if (-not (Test-Path $httpServerCmd)) {
     exit 1
 }
 
-$logFile = Join-Path $env:TEMP 'castastrophe-http.log'
-$errFile = Join-Path $env:TEMP 'castastrophe-http-err.log'
+$logFile = Join-Path $env:TEMP 'kepler-klicker-http.log'
+$errFile = Join-Path $env:TEMP 'kepler-klicker-http-err.log'
 $httpProcess = Start-Process -FilePath $httpServerCmd `
     -ArgumentList ".", "-p", $Port, "-a", "0.0.0.0", "-c-1", "--cors" `
     -WorkingDirectory $rootDir `
@@ -118,12 +117,11 @@ if (-not $ready) {
 # ---- Display -------------------------------------------------------
 
 Write-Host ""
-Write-Host "  Castastrophe! is running" -ForegroundColor Green
+Write-Host "  Kepler Klicker is running" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Local   : http://localhost:$Port" -ForegroundColor Cyan
 Write-Host "  Network : http://${localIP}:$Port" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "  Give players the Network URL to join on their phones." -ForegroundColor DarkGray
 Write-Host "  Press Ctrl+C to stop." -ForegroundColor DarkGray
 Write-Host ""
 
@@ -134,8 +132,6 @@ if (-not $NoBrowser) {
 # ---- Keep running until Ctrl+C -------------------------------------
 
 try {
-    Write-Host "  Using live Firebase (no emulator)." -ForegroundColor DarkGray
-    Write-Host ""
     # Block until user presses Ctrl+C
     while ($true) {
         Start-Sleep -Seconds 3600

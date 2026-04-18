@@ -1,11 +1,11 @@
 # ============================================================
-# Castastrophe! - Stop the dev server
+# Kepler Klicker - Stop the dev server
 # Usage: .\stop.ps1
 #        .\stop.ps1 -Port 3000
 # ============================================================
 param([int]$Port = 8080)
 
-$PidFile = Join-Path $PSScriptRoot '.castastrophe.pid'
+$PidFile = Join-Path $PSScriptRoot '.kepler-klicker.pid'
 
 function Stop-ServerByPid {
     if (Test-Path $PidFile) {
@@ -37,7 +37,7 @@ function Stop-ServerByPort {
 }
 
 Write-Host ""
-Write-Host "Stopping Castastrophe! server..." -ForegroundColor Yellow
+Write-Host "Stopping Kepler Klicker server..." -ForegroundColor Yellow
 Stop-ServerByPid
 Stop-ServerByPort -p $Port
 Write-Host "  Done." -ForegroundColor Green
