@@ -42,7 +42,7 @@ export class BiggestCatch extends BaseMinigame {
       </div>
       <div class="escape-timer"><div class="escape-timer-fill" id="escape-timer-fill"></div></div>
       <div id="bite-flash" class="bite-flash"></div>
-      <canvas id="rod-anim" class="rod-anim" width="256" height="256"></canvas>
+      <img id="rod-anim" class="rod-anim" src="assets/rod/idle-out/frame-0.png" alt="">
       <img id="bobber-sprite" class="bobber-sprite" src="assets/ui/bobber.png" alt="" style="display:none">
       <img id="exclamation-sprite" class="exclamation-sprite" src="assets/ui/exclamation.png" alt="" style="display:none">
       <div id="game-message" class="game-message"></div>
@@ -86,27 +86,27 @@ export class BiggestCatch extends BaseMinigame {
 
     this._powerInterval = null;
 
-    // Preload all rod strips into cache
-    this._rodStrips = {};
-    ['antic','cast','idle-out','idle-in','set-hook','reel','catch'].forEach(key => {
-      const img = new Image();
-      img.src = `assets/rod/${key}.png`;
-      this._rodStrips[key] = img;
+    // Preload all individual rod frames into cache
+    const ROD_CONFIG = {
+      'antic':    { frames:  7, delay: 100, loop: true  },
+      'cast':     { frames: 12, delay:  70, loop: false },
+      'idle-out': { frames:  4, delay: 180, loop: true  },
+      'idle-in':  { frames:  2, delay: 220, loop: true  },
+      'set-hook': { frames:  6, delay:  70, loop: true  },
+      'reel':     { frames:  5, delay: 110, loop: true  },
+      'catch':    { frames:  3, delay: 140, loop: false },
+    };
+    this._ROD_CONFIG = ROD_CONFIG;
+    this._rodFrameImgs = {};
+    Object.entries(ROD_CONFIG).forEach(([key, cfg]) => {
+      this._rodFrameImgs[key] = Array.from({ length: cfg.frames }, (_, i) => {
+        const img = new Image();
+        img.src = `assets/rod/${key}/frame-${i}.png`;
+        return img;
+      });
     });
     this._rodFrameTimer = null;
     this._rodFrameIdx   = 0;
-
-    // Draw first frame immediately once idle-out strip loads
-    const initCanvas = document.getElementById('rod-anim');
-    if (initCanvas) {
-      const initStrip = this._rodStrips['idle-out'];
-      const drawFirst = () => {
-        const ctx = initCanvas.getContext('2d');
-        ctx.clearRect(0, 0, 256, 256);
-        ctx.drawImage(initStrip, 0, 0, 256, 256, 0, 0, 256, 256);
-      };
-      initStrip.complete ? drawFirst() : (initStrip.onload = drawFirst);
-    }
 
     showGameMessage(BiggestCatch.description, 0);
   }
@@ -254,48 +254,42 @@ export class BiggestCatch extends BaseMinigame {
 
   // ---- Visual helpers ----
 
-  /** Animate the rod using canvas drawImage — guaranteed transparent background */
+  /** Animate the rod by swapping <img src> each frame — plain img, no canvas */
   _setRodState(stateName) {
-    const config = {
-      idle:      { key: 'idle-out', frames:  4, delay: 180, loop: true  },
-      preparing: { key: 'antic',    frames:  7, delay: 100, loop: true  },
-      cast:      { key: 'cast',     frames: 12, delay:  70, loop: false },
-      waiting:   { key: 'idle-in',  frames:  2, delay: 220, loop: true  },
-      bite:      { key: 'set-hook', frames:  6, delay:  70, loop: true  },
-      reeling:   { key: 'reel',     frames:  5, delay: 110, loop: true  },
-      catch:     { key: 'catch',    frames:  3, delay: 140, loop: false },
+    const stateMap = {
+      idle:      'idle-out',
+      preparing: 'antic',
+      cast:      'cast',
+      waiting:   'idle-in',
+      bite:      'set-hook',
+      reeling:   'reel',
+      catch:     'catch',
     };
-    const c = config[stateName] || config.idle;
+    const key = stateMap[stateName] || 'idle-out';
+    const c   = this._ROD_CONFIG[key];
     clearInterval(this._rodFrameTimer);
     this._rodFrameTimer = null;
     this._rodFrameIdx = 0;
 
-    const rodCanvas = document.getElementById('rod-anim');
-    if (!rodCanvas) return;
-    const ctx = rodCanvas.getContext('2d');
-    const cw = rodCanvas.width;   // 256
-    const ch = rodCanvas.height;  // 256
-    const strip = this._rodStrips[c.key];
-    if (!strip) return;
+    const rodImg = document.getElementById('rod-anim');
+    if (!rodImg || !c) return;
+    const frameImgs = this._rodFrameImgs[key];
+    rodImg.src = frameImgs[0].src;
 
-    const startAnim = () => {
-      const advance = () => {
-        ctx.clearRect(0, 0, cw, ch);
-        ctx.drawImage(strip, this._rodFrameIdx * cw, 0, cw, ch, 0, 0, cw, ch);
-        if (this._rodFrameIdx < c.frames - 1) {
-          this._rodFrameIdx++;
-        } else if (c.loop) {
+    const advance = () => {
+      this._rodFrameIdx++;
+      if (this._rodFrameIdx >= c.frames) {
+        if (c.loop) {
           this._rodFrameIdx = 0;
         } else {
           clearInterval(this._rodFrameTimer);
           this._rodFrameTimer = null;
+          return;
         }
-      };
-      advance();
-      this._rodFrameTimer = setInterval(advance, c.delay);
+      }
+      rodImg.src = frameImgs[this._rodFrameIdx].src;
     };
-
-    strip.complete ? startAnim() : (strip.onload = startAnim);
+    this._rodFrameTimer = setInterval(advance, c.delay);
   }
 
   _showPowerBar() {

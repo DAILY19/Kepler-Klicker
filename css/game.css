@@ -103,8 +103,8 @@
 
 /* ======== Rod Animation ======== */
 /*
- * .rod-anim — canvas element. JS calls clearRect + drawImage each frame,
- * guaranteeing a fully transparent background (no clip-div needed).
+ * .rod-anim — plain <img> element. JS swaps src each frame from preloaded
+ * individual frame PNGs, giving true RGBA transparency with no canvas needed.
  */
 .rod-anim {
   position: absolute;
@@ -117,7 +117,6 @@
   z-index: 1;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  background: transparent;
 }
 
 /* ======== Bobber Sprite ======== */

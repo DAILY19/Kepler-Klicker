@@ -1,13 +1,12 @@
 """
 make-rod-sprites.py
-Generates transparent PNG sprite strips from fishingRodSprites.png.
-GIFs have unreliable browser transparency -- we use RGBA PNGs instead.
+Generates individual transparent PNG frames from fishingRodSprites.png.
 
-Each output is a horizontal strip: all frames side-by-side.
-The JS animator slices frames by offsetting the strip inside a clip container.
+Each animation gets its own subfolder of per-frame PNGs.
+JS animates by swapping <img src> — no canvas, no clip-div needed.
 
-Output: assets/rod/{name}.png       -- horizontal RGBA strip
-        assets/rod/{name}-icon.png  -- first frame only (for button icons)
+Output: assets/rod/{name}/frame-{N}.png  -- individual RGBA frames
+        assets/rod/{name}-icon.png        -- first frame (for button icons)
 
 Usage:
   python scripts/make-rod-gifs.py
@@ -45,9 +44,8 @@ OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "assets", "rod")
 def make_transparent(img):
     img = img.convert("RGBA")
     cleaned = [
-        # Also remove near-white opaque pixels (fringe on white-bg sheets)
         (r, g, b, 0) if a > 0 and r >= WHITE_THRESH and g >= WHITE_THRESH and b >= WHITE_THRESH
-        else (r, g, b, a)   # preserve existing alpha (transparent bg stays transparent)
+        else (r, g, b, a)
         for r, g, b, a in img.getdata()
     ]
     img.putdata(cleaned)
@@ -95,18 +93,22 @@ def main():
             print(f"  [skip] {name} -- no content in row {row_idx}")
             continue
 
-        # Horizontal strip: all frames side-by-side, RGBA transparent background
-        strip = Image.new("RGBA", (fw * len(frames), fh), (0, 0, 0, 0))
+        # Individual frame PNGs in a subfolder
+        frame_dir = os.path.join(OUT_DIR, name)
+        os.makedirs(frame_dir, exist_ok=True)
         for i, frame in enumerate(frames):
-            strip.paste(frame, (i * fw, 0), frame)
+            frame.save(os.path.join(frame_dir, f"frame-{i}.png"), "PNG")
 
-        strip.save(os.path.join(OUT_DIR, f"{name}.png"), "PNG")
+        # First-frame icon at top level (for button images)
         frames[0].save(os.path.join(OUT_DIR, f"{name}-icon.png"), "PNG")
 
-        print(f"  [{row_idx}] {name}.png -- {len(frames)} frames @ {delay}ms  ({fw * len(frames)}x{fh}px)")
+        print(f"  [{row_idx}] {name}/ -- {len(frames)} frames @ {delay}ms  ({fw}x{fh}px each)")
 
-    print(f"\nDone! PNG strips in {OUT_DIR}")
+    print(f"\nDone! Individual frame PNGs in {OUT_DIR}")
 
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
