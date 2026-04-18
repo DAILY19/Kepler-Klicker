@@ -11,7 +11,7 @@ const UPGRADES = [
     baseCost: 15,
     costScale: 1.15,
     dps: 1,
-    icon: 'assets/Environment/Asteroids/PNGs/Asteroid 01 - Base.png',
+    icon: 'assets/Icons/Icon31_01.png',
   },
   {
     id: 'drone',
@@ -20,7 +20,7 @@ const UPGRADES = [
     baseCost: 100,
     costScale: 1.15,
     dps: 5,
-    icon: 'assets/Environment/Effects/PNGs/Asteroid - Flame.png',
+    icon: 'assets/Icons/Icon31_05.png',
   },
   {
     id: 'station',
@@ -29,7 +29,7 @@ const UPGRADES = [
     baseCost: 500,
     costScale: 1.15,
     dps: 25,
-    icon: 'assets/Environment/Planets/PNGs/Baren.png',
+    icon: 'assets/Icons/Icon31_04.png',
   },
   {
     id: 'colony',
@@ -38,7 +38,7 @@ const UPGRADES = [
     baseCost: 2500,
     costScale: 1.15,
     dps: 100,
-    icon: 'assets/Environment/Planets/PNGs/Ice.png',
+    icon: 'assets/Icons/Icon31_25.png',
   },
   {
     id: 'forge',
@@ -47,7 +47,7 @@ const UPGRADES = [
     baseCost: 12000,
     costScale: 1.15,
     dps: 400,
-    icon: 'assets/Environment/Planets/PNGs/Lava.png',
+    icon: 'assets/Icons/Icon31_35.png',
   },
   {
     id: 'terraformer',
@@ -56,7 +56,7 @@ const UPGRADES = [
     baseCost: 55000,
     costScale: 1.15,
     dps: 1600,
-    icon: 'assets/Environment/Planets/PNGs/Terran.png',
+    icon: 'assets/Icons/Icon31_40.png',
   },
   {
     id: 'singularity',
@@ -65,7 +65,7 @@ const UPGRADES = [
     baseCost: 250000,
     costScale: 1.15,
     dps: 6666,
-    icon: 'assets/Environment/Planets/PNGs/Black_hole.png',
+    icon: 'assets/Icons/Icon31_09.png',
   },
 ];
 
@@ -85,6 +85,7 @@ let game = {
   clickPower: 1,
   owned: {},       // { upgradeId: count }
   musicOn: false,
+  sfxOn: true,
   currentSkin: 0,
 };
 
@@ -98,17 +99,33 @@ const elShopList   = document.getElementById('shop-list');
 const elShop       = document.getElementById('shop');
 const btnToggle    = document.getElementById('btn-toggle-shop');
 const btnMusic     = document.getElementById('btn-music');
-const btnSave      = document.getElementById('btn-save');
+const btnSFX       = document.getElementById('btn-sfx');
+const btnNextTrack = document.getElementById('btn-next-track');
 const btnReset     = document.getElementById('btn-reset');
 
 // ---- Audio ----
+const MUSIC_LOOPS = [
+  'assets/Loops/mp3/Sci-Fi 1 Loop.mp3',
+  'assets/Loops/mp3/Sci-Fi 2 Loop.mp3',
+  'assets/Loops/mp3/Sci-Fi 3 Loop.mp3',
+  'assets/Loops/mp3/Sci-Fi 4 Loop.mp3',
+  'assets/Loops/mp3/Sci-Fi 5 Loop.mp3',
+  'assets/Loops/mp3/Sci-Fi 6 Loop.mp3',
+  'assets/Loops/mp3/Sci-Fi 7 Loop.mp3',
+  'assets/Loops/mp3/Sci-Fi 8 Loop.mp3',
+];
+let currentTrackIdx = 0;
 let bgMusic = null;
 
 function initMusic() {
   if (bgMusic) return;
-  bgMusic = new Audio('assets/Loops/mp3/Sci-Fi 1 Loop.mp3');
-  bgMusic.loop = true;
+  bgMusic = new Audio(MUSIC_LOOPS[currentTrackIdx]);
   bgMusic.volume = 0.3;
+  bgMusic.onended = () => {
+    currentTrackIdx = (currentTrackIdx + 1) % MUSIC_LOOPS.length;
+    bgMusic.src = MUSIC_LOOPS[currentTrackIdx];
+    if (game.musicOn) bgMusic.play().catch(() => {});
+  };
 }
 
 function toggleMusic() {
@@ -116,12 +133,91 @@ function toggleMusic() {
   if (game.musicOn) {
     bgMusic.pause();
     game.musicOn = false;
-    btnMusic.classList.remove('active');
+    btnMusic.querySelector('img').src = 'assets/UI/Buttons/BTNs/Music_BTN.png';
   } else {
     bgMusic.play().catch(() => {});
     game.musicOn = true;
-    btnMusic.classList.add('active');
+    btnMusic.querySelector('img').src = 'assets/UI/Buttons/BTNs_Active/Music_BTN.png';
   }
+}
+
+function nextTrack() {
+  initMusic();
+  currentTrackIdx = (currentTrackIdx + 1) % MUSIC_LOOPS.length;
+  bgMusic.src = MUSIC_LOOPS[currentTrackIdx];
+  if (game.musicOn) bgMusic.play().catch(() => {});
+}
+
+// ---- SFX ----
+const SFX_BASE = 'assets/SFX/Stereo/mp3/JDSherbert - Sci Fi UI SFX Pack - ';
+let sfxPool = null;
+
+function initSFX() {
+  if (sfxPool) return;
+  const clicks = Array.from({ length: 5 }, () => {
+    const a = new Audio(SFX_BASE + 'Cursor - 1.mp3');
+    a.volume = 0.2;
+    return a;
+  });
+  let clickIdx = 0;
+  const mkSFX = (name, vol = 0.4) => {
+    const a = new Audio(SFX_BASE + name);
+    a.volume = vol;
+    return a;
+  };
+  const selectSFX = mkSFX('Select - 1.mp3');
+  const errorSFX  = mkSFX('Error - 1.mp3');
+  const openSFX   = mkSFX('Popup Open - 1.mp3');
+  const closeSFX  = mkSFX('Popup Close - 1.mp3');
+  sfxPool = {
+    click() {
+      if (!game.sfxOn) return;
+      clicks[clickIdx].currentTime = 0;
+      clicks[clickIdx].play().catch(() => {});
+      clickIdx = (clickIdx + 1) % clicks.length;
+    },
+    buy() {
+      if (!game.sfxOn) return;
+      selectSFX.currentTime = 0;
+      selectSFX.play().catch(() => {});
+    },
+    error() {
+      if (!game.sfxOn) return;
+      errorSFX.currentTime = 0;
+      errorSFX.play().catch(() => {});
+    },
+    shopOpen() {
+      if (!game.sfxOn) return;
+      openSFX.currentTime = 0;
+      openSFX.play().catch(() => {});
+    },
+    shopClose() {
+      if (!game.sfxOn) return;
+      closeSFX.currentTime = 0;
+      closeSFX.play().catch(() => {});
+    },
+  };
+}
+
+function playSFX(name) {
+  sfxPool?.[name]?.();
+}
+
+function toggleSFX() {
+  initSFX();
+  game.sfxOn = !game.sfxOn;
+  btnSFX.querySelector('img').src = game.sfxOn
+    ? 'assets/UI/Buttons/BTNs_Active/Sound_BTN.png'
+    : 'assets/UI/Buttons/BTNs/Sound_BTN.png';
+}
+
+function updateButtonStates() {
+  btnMusic.querySelector('img').src = game.musicOn
+    ? 'assets/UI/Buttons/BTNs_Active/Music_BTN.png'
+    : 'assets/UI/Buttons/BTNs/Music_BTN.png';
+  btnSFX.querySelector('img').src = game.sfxOn
+    ? 'assets/UI/Buttons/BTNs_Active/Sound_BTN.png'
+    : 'assets/UI/Buttons/BTNs/Sound_BTN.png';
 }
 
 // ---- Number Formatting ----
@@ -175,6 +271,7 @@ function updatePlanetSkin() {
 // ---- Click Handling ----
 function handleClick(e) {
   e.preventDefault();
+  initSFX();
 
   game.stardust += game.clickPower;
   game.totalStardust += game.clickPower;
@@ -183,6 +280,8 @@ function handleClick(e) {
   elPlanet.classList.remove('clicked');
   void elPlanet.offsetWidth; // reflow
   elPlanet.classList.add('clicked');
+
+  playSFX('click');
 
   // Floating number
   spawnFloatNumber(e);
@@ -257,11 +356,15 @@ function updateShop() {
 
 function buyUpgrade(upgrade) {
   const cost = getCost(upgrade);
-  if (game.stardust < cost) return;
+  if (game.stardust < cost) {
+    playSFX('error');
+    return;
+  }
 
   game.stardust -= cost;
   game.owned[upgrade.id] = (game.owned[upgrade.id] || 0) + 1;
 
+  playSFX('buy');
   updateDisplay();
 }
 
@@ -292,6 +395,7 @@ function saveGame() {
     totalStardust: game.totalStardust,
     clickPower: game.clickPower,
     owned: game.owned,
+    sfxOn: game.sfxOn,
     savedAt: Date.now(),
   };
   localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -306,6 +410,7 @@ function loadGame() {
     game.totalStardust = data.totalStardust || 0;
     game.clickPower = data.clickPower || 1;
     game.owned = data.owned || {};
+    if (data.sfxOn !== undefined) game.sfxOn = data.sfxOn;
 
     // Award offline earnings (capped at 8 hours)
     if (data.savedAt) {
@@ -330,6 +435,7 @@ function resetGame() {
     clickPower: 1,
     owned: {},
     musicOn: game.musicOn,
+    sfxOn: game.sfxOn,
     currentSkin: 0,
   };
   elPlanet.src = PLANET_SKINS[0].src;
@@ -342,15 +448,20 @@ setInterval(saveGame, 30000);
 
 // ---- Init ----
 loadGame();
+updateButtonStates();
 renderShop();
 updateDisplay();
 requestAnimationFrame(tick);
 
 // Event listeners
 elPlanetWrap.addEventListener('pointerdown', handleClick);
-btnToggle.addEventListener('click', () => elShop.classList.toggle('collapsed'));
+btnToggle.addEventListener('click', () => {
+  const collapsed = elShop.classList.toggle('collapsed');
+  playSFX(collapsed ? 'shopClose' : 'shopOpen');
+});
 btnMusic.addEventListener('click', toggleMusic);
-btnSave.addEventListener('click', saveGame);
+btnSFX.addEventListener('click', toggleSFX);
+btnNextTrack.addEventListener('click', nextTrack);
 btnReset.addEventListener('click', resetGame);
 
 // Save on close
